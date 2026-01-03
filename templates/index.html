@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor de Imágenes Web</title>
+       <link rel="icon" href="{{ url_for('static', filename='css/imago_logo.ico') }}" type="image/x-icon">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-image"></i> Conversor de Imágenes Web</h1>
+            <img src="{{url_for('static', filename= 'css/imAgo.png')}}" alt="logo" width="150px" height="150px">
+            <p class="subtitle">Convierte, redimensiona y optimiza tus imágenes en línea</p>
+        </header>
+     <div class="donation-card">
+    <div class="donation-icon">
+        <i class="fas fa-heart"></i>
+    </div>
+    <h1>Apoya nuestro proyecto</h1>
+    <p>Si <strong>Imago</strong> te ha sido de utilidad, considera apoyar su desarrollo con una pequeña donación.</p>
+
+    <form action="https://www.paypal.com/donate" method="post" target="_blank">
+        <input type="hidden" name="business" value="comercializadora_moringa@hotmail.com" />
+        <input type="hidden" name="currency_code" value="USD" />
+        
+        <button type="submit" class="btn-paypal">
+            <i class="fab fa-paypal"></i> Donar con PayPal
+        </button>
+    </form>
+
+    <div class="thanks-footer">
+        <span>¡Gracias por tu apoyo! 🙌</span>
+    </div>
+</div>
+
+        <div class="main-content">
+            <!-- Panel de control -->
+            <div class="control-panel">
+                <div class="card">
+                    <h2><i class="fas fa-cog"></i> Configuración de Conversión</h2>
+                    
+                    <div class="form-group">
+                        <label for="format"><i class="fas fa-file-image"></i> Formato de salida:</label>
+                        <select id="format" class="form-control">
+                            {% for format in formats %}
+                            <option value="{{ format }}" {% if format == 'JPEG' %}selected{% endif %}>{{ format }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Opciones ICO (ocultas por defecto) -->
+                    <div id="ico-options" class="hidden">
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="ico-multi-size">
+                                <i class="fas fa-layer-group"></i> ICO con múltiples tamaños
+                            </label>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ico-size"><i class="fas fa-expand-arrows-alt"></i> Tamaño ICO:</label>
+                            <select id="ico-size" class="form-control">
+                                <option value="16">16x16 px</option>
+                                <option value="32">32x32 px</option>
+                                <option value="48">48x48 px</option>
+                                <option value="64">64x64 px</option>
+                                <option value="128">128x128 px</option>
+                                <option value="256" selected>256x256 px</option>
+                            </select>
+                        </div>
+                        
+                        <div class="info-box">
+                            <p><i class="fas fa-info-circle"></i> Los ICO son usados para iconos de aplicaciones.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quality"><i class="fas fa-chart-line"></i> Calidad:</label>
+                        <select id="quality" class="form-control">
+                            <option value="95">Máxima (95%)</option>
+                            <option value="85" selected>Alta (85%)</option>
+                            <option value="75">Media (75%)</option>
+                            <option value="65">Baja (65%)</option>
+                            <option value="custom">Personalizada...</option>
+                        </select>
+                        <div id="custom-quality-container" class="hidden">
+                            <input type="range" id="custom-quality" min="1" max="100" value="85" class="slider">
+                            <span id="quality-value">85%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="width"><i class="fas fa-arrows-alt-h"></i> Ancho (px):</label>
+                            <input type="number" id="width" class="form-control" placeholder="Auto" min="1" max="5000">
+                        </div>
+                        <div class="form-group">
+                            <label for="height"><i class="fas fa-arrows-alt-v"></i> Alto (px):</label>
+                            <input type="number" id="height" class="form-control" placeholder="Auto" min="1" max="5000">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="maintain-aspect" checked>
+                            <i class="fas fa-expand-alt"></i> Mantener relación de aspecto
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="batch-mode">
+                            <i class="fas fa-layer-group"></i> Modo por lotes (descargar ZIP)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-info-circle"></i> Información</h2>
+                    <div class="info-box">
+                        <p><i class="fas fa-check-circle"></i> Formatos soportados: PNG, JPEG, GIF, BMP, TIFF, WEBP, ICO</p>
+                        <p><i class="fas fa-check-circle"></i> Tamaño máximo: 50MB por archivo</p>
+                        <p><i class="fas fa-check-circle"></i> Dimensión máxima: 5000x5000 píxeles</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de subida -->
+            <div class="upload-area">
+                <div class="card upload-card">
+                    <div class="upload-header">
+                        <h2><i class="fas fa-cloud-upload-alt"></i> Subir Imágenes</h2>
+                        <div class="file-counter">
+                            <span id="file-count">0 archivos</span>
+                        </div>
+                    </div>
+
+                    <div class="upload-zone" id="drop-zone">
+                        <i class="fas fa-images upload-icon"></i>
+                        <p>Arrastra y suelta tus imágenes aquí</p>
+                        <p class="upload-subtext">o</p>
+                        <button class="btn btn-primary" id="browse-btn">
+                            <i class="fas fa-folder-open"></i> Seleccionar Archivos
+                        </button>
+                        <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
+                        <p class="file-types">PNG, JPG, JPEG, GIF, BMP, TIFF, WEBP, ICO</p>
+                    </div>
+
+                    <!-- Lista de archivos -->
+                    <div class="file-list" id="file-list">
+                        <!-- Los archivos aparecerán aquí -->
+                    </div>
+
+                    <!-- Vista previa -->
+                    <div class="preview-container" id="preview-container">
+                        <h3><i class="fas fa-eye"></i> Vista Previa</h3>
+                        <div class="preview-placeholder" id="preview-placeholder">
+                            <i class="fas fa-image"></i>
+                            <p>Selecciona una imagen para previsualizar</p>
+                        </div>
+                        <div class="preview-image hidden" id="preview-image">
+                            <img id="preview-img" src="" alt="Vista previa">
+                            <div class="preview-info" id="preview-info"></div>
+                        </div>
+                    </div>
+
+                    <!-- Botón de conversión -->
+                    <div class="action-bar">
+                        <button class="btn btn-convert" id="convert-btn" disabled>
+                            <i class="fas fa-sync-alt"></i> Convertir Imágenes
+                        </button>
+                        <div class="progress-container hidden" id="progress-container">
+                            <div class="progress-bar" id="progress-bar"></div>
+                            <span id="progress-text">0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Resultados -->
+                    <div class="results-container hidden" id="results-container">
+                        <h3><i class="fas fa-check-circle"></i> Resultados</h3>
+                        <div id="results-content"></div>
+                        <div class="results-actions" id="results-actions"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>© 2025| Moringmex Tech
+                <a href="#" onclick="clearAllFiles()"><i class="fas fa-trash"></i> Limpiar todo</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Modal para información -->
+    <div class="modal hidden" id="info-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> Información de la Imagen</h3>
+                <button class="modal-close" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
