@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imago(Conversor de imagenes)</title>
+    <title>Conversor de Imágenes Web</title>
        <link rel="icon" href="{{ url_for('static', filename='css/imago_logo.ico') }}" type="image/x-icon">
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -17,28 +17,34 @@
             <img src="{{url_for('static', filename= 'css/imAgo.png')}}" alt="logo" width="150px" height="150px">
             <p class="subtitle">Convierte, redimensiona y optimiza tus imágenes en línea</p>
         </header>
-     <div class="donation-card">
-    <div class="donation-icon">
-        <i class="fas fa-heart"></i>
-    </div>
-    <h1>Apoya nuestro proyecto</h1>
-    <p>Si <strong>Imago</strong> te ha sido de utilidad, considera apoyar su desarrollo con una pequeña donación.</p>
+     <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
 
-    <form action="https://www.paypal.com/donate" method="post" target="_blank">
-        <input type="hidden" name="business" value="comercializadora_moringa@hotmail.com" />
-        <input type="hidden" name="currency_code" value="USD" />
+    <div class="donation-card">
+        <div class="donation-icon"><i class="fas fa-heart"></i></div>
+        <h1>Apoya nuestro proyecto</h1>
+        <p>Si <strong>Imago</strong> te ha sido de utilidad, considera apoyar su desarrollo.</p>
+        <form action="https://www.paypal.com/donate" method="post" target="_blank">
+            <input type="hidden" name="business" value="comercializadora_moringa@hotmail.com" />
+            <button type="submit" class="btn-paypal">
+                <i class="fab fa-paypal"></i> Donar con PayPal
+            </button>
+        </form>
+        <div class="thanks-footer"><span>¡Gracias por tu apoyo! 🙌</span></div>
+    </div>
+
+    <div class="donation-card">
+        <div class="donation-icon"><i class="fas fa-qrcode"></i></div>
+        <h1>Generador QR</h1>
+        <p>Crea tus códigos QR personalizados rápidamente aquí.</p>
         
-        <button type="submit" class="btn-paypal">
-            <i class="fab fa-paypal"></i> Donar con PayPal
-        </button>
-    </form>
-
-    <div class="thanks-footer">
-        <span>¡Gracias por tu apoyo!</span>
+        <a href="{{ url_for('mostrar_nueva_pagina') }}" class="btn-paypal" style="text-decoration: none; display: inline-block;">
+            <i class="fas fa-qrcode"></i> Ir al Generador
+        </a>
+        
+        <div class="thanks-footer"><span>¡Listo para usar!</span></div>
     </div>
-</div>
 
-        <div class="main-content">
+</div>
             <!-- Panel de control -->
             <div class="control-panel">
                 <div class="card">
