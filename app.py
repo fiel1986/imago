@@ -12,7 +12,7 @@ import zipfile
 from io import BytesIO
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'dev-secret-key-change-in-production'
+app.config['SECRET_KEY'] = ''
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['CONVERTED_FOLDER'] = 'converted'
@@ -51,7 +51,7 @@ class ImageConverter:
                filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
     
     def get_unique_filename(self, folder, filename):
-        """Generar un nombre único para el archivo"""
+        
         path = Path(folder) / filename
         if not path.exists():
             return filename
@@ -60,7 +60,7 @@ class ImageConverter:
         return f"{name}_{uuid.uuid4().hex[:8]}{ext}"
     
     def prepare_image_for_ico(self, img, size):
-        """Prepara una imagen para convertirse a ICO"""
+        
         width, height = size
         
         
@@ -94,7 +94,7 @@ class ImageConverter:
         return square_img
     
     def create_multi_size_ico(self, img, output_path):
-        """Crea un ICO con múltiples tamaños (16x16, 32x32, 48x48, 64x64, 128x128, 256x256)"""
+       
         images_for_ico = []
         
         for size in self.ico_sizes:
@@ -113,7 +113,7 @@ class ImageConverter:
     def convert_image(self, input_path, output_path, output_format, 
                      width=None, height=None, quality=85, maintain_aspect=True,
                      ico_multi_size=False):
-        """Convertir imagen a otro formato y tamaño"""
+        
         try:
             with Image.open(input_path) as img:
                 original_format = img.format
@@ -135,7 +135,7 @@ class ImageConverter:
                         elif height and not width:
                             width = height
                         
-                        # Preparar y guardar ICO
+                        # ICO
                         ico_img = self.prepare_image_for_ico(img, (width, height))
                         ico_img.save(output_path, format='ICO', sizes=[(width, height)])
                     
@@ -230,7 +230,7 @@ class ImageConverter:
             }
     
     def get_image_info(self, image_path):
-        """Obtener información de la imagen"""
+
         try:
             with Image.open(image_path) as img:
                 info = {
@@ -247,6 +247,10 @@ class ImageConverter:
             return {'error': str(e)}
 
 converter = ImageConverter()
+
+@app.route('/generar')
+def mostrar_nueva_pagina():
+    return render_template('generador_qr.html')
 
 @app.route('/')
 def index():
