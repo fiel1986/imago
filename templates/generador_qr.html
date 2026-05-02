@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador QR</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .contenedor { background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 95%; max-width: 600px; padding: 30px; text-align: center; }
+        h1 { color: #333; margin-bottom: 20px; font-size: 1.5rem; }
+        
+        .seccion-controles { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; margin-bottom: 20px; }
+        .campo { margin-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-size: 0.9rem; font-weight: bold; color: #555; }
+        
+        input[type="text"], input[type="file"] { width: 100%; padding: 10px; border: 2px solid #eee; border-radius: 8px; }
+        input[type="color"] { width: 100%; height: 40px; border: none; cursor: pointer; background: none; }
+        
+        button { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
+        button:hover { opacity: 0.9; transform: translateY(-2px); }
+        
+        .qr-result { display: none; margin-top: 25px; border-top: 2px solid #eee; padding-top: 20px; }
+        .qr-result.show { display: block !important; }
+        canvas { border-radius: 10px; max-width: 250px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        /* ESTILOS DEL HISTORIAL */
+        .historial { margin-top: 30px; text-align: left; border-top: 2px solid #eee; padding-top: 20px; }
+        .historial h2 { font-size: 1.1rem; color: #444; margin-bottom: 15px; }
+        .lista-historial { display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto; padding-right: 5px; }
+        .item-historial { background: #f8f9fa; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; border-left: 4px solid #6a11cb; }
+        .item-historial span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; color: #666; }
+        .btn-reusar { background: none; color: #2575fc; padding: 5px; width: auto; font-size: 0.8rem; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1>Generador QR</h1>
+        
+        <div class="campo">
+            <label>Texto o URL:</label>
+            <input type="text" id="qr-text" placeholder="Escribe aquí tu enlace...">
+        </div>
+
+        <div class="seccion-controles">
+            <div class="campo">
+                <label>Color QR:</label>
+                <input type="color" id="color-qr" value="#000000">
+            </div>
+            <div class="campo">
+                <label>Fondo:</label>
+                <input type="color" id="color-fondo" value="#ffffff">
+            </div>
+            <div class="campo" style="grid-column: span 2;">
+                <label>Logo (opcional):</label>
+                <input type="file" id="qr-logo" accept="image/*">
+            </div>
+        </div>
+        
+        <button id="generate-btn">Generar y Guardar</button>
+        
+        <div class="qr-result" id="qr-result">
+            <div id="qrcode" style="display:none;"></div>
+            <canvas id="canvas-final"></canvas>
+            <br>
+            <button id="download-btn" style="background: #28a745; margin-top: 10px; padding: 10px;">Descargar PNG</button>
+        </div>
+
+        <div class="historial" id="seccion-historial" style="display: none;">
+            <h2>Recientes</h2>
+            <div class="lista-historial" id="lista-historial"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const qrText = document.getElementById('qr-text');
+            const qrLogo = document.getElementById('qr-logo');
+            const colorQR = document.getElementById('color-qr');
+            const colorFondo = document.getElementById('color-fondo');
+            const generateBtn = document.getElementById('generate-btn');
+            const qrResult = document.getElementById('qr-result');
+            const qrcodeDiv = document.getElementById('qrcode');
+            const canvasFinal = document.getElementById('canvas-final');
+            const downloadBtn = document.getElementById('download-btn');
+            const listaHistorial = document.getElementById('lista-historial');
+            const seccionHistorial = document.getElementById('seccion-historial');
+
+            // Cargar historial al iniciar
+            mostrarHistorial();
+
+            generateBtn.addEventListener('click', () => {
+                const text = qrText.value.trim();
+                if (!text) return alert("¡Escribe algo, mi vida! 😊");
+
+                generarQR(text);
+                guardarEnHistorial(text);
+            });
+
+            function generarQR(text) {
+                qrcodeDiv.innerHTML = '';
+                const qrcode = new QRCode(qrcodeDiv, {
+                    text: text,
+                    width: 400,
+                    height: 400,
+                    colorDark: colorQR.value,
+                    colorLight: colorFondo.value,
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                setTimeout(() => {
+                    const qrCanvas = qrcodeDiv.querySelector('canvas');
+                    const ctx = canvasFinal.getContext('2d');
+                    canvasFinal.width = 400;
+                    canvasFinal.height = 400;
+                    ctx.drawImage(qrCanvas, 0, 0);
+
+                    if (qrLogo.files && qrLogo.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const logo = new Image();
+                            logo.src = e.target.result;
+                            logo.onload = () => {
+                                const size = 80;
+                                const x = (400 - size) / 2;
+                                ctx.fillStyle = colorFondo.value;
+                                ctx.fillRect(x - 5, x - 5, size + 10, size + 10);
+                                ctx.drawImage(logo, x, x, size, size);
+                                qrResult.classList.add('show');
+                            };
+                        };
+                        reader.readAsDataURL(qrLogo.files[0]);
+                    } else {
+                        qrResult.classList.add('show');
+                    }
+                }, 300);
+            }
+
+            function guardarEnHistorial(texto) {
+                let historial = JSON.parse(localStorage.getItem('mis_qrs')) || [];
+                // Evitar duplicados seguidos
+                if (historial[0] !== texto) {
+                    historial.unshift(texto);
+                    historial = historial.slice(0, 10); // Solo guardamos los últimos 10
+                    localStorage.setItem('mis_qrs', JSON.stringify(historial));
+                }
+                mostrarHistorial();
+            }
+
+            function mostrarHistorial() {
+                const historial = JSON.parse(localStorage.getItem('mis_qrs')) || [];
+                if (historial.length > 0) {
+                    seccionHistorial.style.display = 'block';
+                    listaHistorial.innerHTML = '';
+                    historial.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'item-historial';
+                        div.innerHTML = `
+                            <span>${item}</span>
+                            <button class="btn-reusar" onclick="reusarTexto('${item}')">Usar</button>
+                        `;
+                        listaHistorial.appendChild(div);
+                    });
+                }
+            }
+
+            window.reusarTexto = (t) => {
+                qrText.value = t;
+                generateBtn.click();
+            };
+
+            downloadBtn.addEventListener('click', () => {
+                const link = document.createElement('a');
+                link.download = 'qr-personalizado.png';
+                link.href = canvasFinal.toDataURL();
+                link.click();
+            });
+        });
+    </script>
+</body>
+</html>
